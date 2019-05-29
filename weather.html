@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--移动端设置-->
+    <meta name="viewport" content="width=device-width,initial-scale=0.55,maximum-scale=1.0, user-scalable=0" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <link  href="7smiles.css" rel="stylesheet">
+    <link rel="shortcut icon" href="img/gslogo.ico">
+    <script src="http://www.jq22.com/jquery/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="common.js"></script>
+    <title>今日天气</title>
+</head>
+<style>
+
+</style>
+<body class="bdfont">
+    <div class="weatherBox">
+        <div class="weather">
+            <div class="wea_cs">
+              	  当前城市：<span id="city"></span>
+            </div>
+            <div class="wea_tq">
+                <img id="tubiao">
+                <span id="tianqi"></span>
+                <span id="wendu"></span>    
+           		 <!--<div class="wea_qh">-->
+               		<span id="fengli" class="ma_r"></span>
+               		 <!-- <span id="shidu"></span>-->	
+            	  <!--</div>-->	
+            </div>
+           
+        </div>
+        <div class="information">
+        	<div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/lv.png">
+                    <span>舒适度</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="lvyou"></span>
+                </div>
+            </div>
+            <div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/zwx.png">
+                    <span>紫外线指数</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="ziwaixian"></span>
+                </div>
+            </div>
+            <div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/jfjz.png">
+                    <span>运动指数</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="yundong"></span>
+                </div>
+            </div>
+            <div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/js.png">
+                    <span>晨练指数</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="chenlian"></span>
+                </div>
+            </div>
+            <div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/cyzs.png">
+                    <span>穿衣指数</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="chuanyi"></span>
+                </div>
+            </div>
+            <div class="inf_con">
+                <div class="inf_con_left">
+                    <img src="img/xczs.png">
+                    <span>洗车指数</span>
+                </div>
+                <div class="inf_con_right">
+                    <span id="xiche"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
+<script>
+$(document).ready(function () {
+	var city = getQueryString("city");
+    if(city==null ||city==""){
+        city="合肥";
+    }
+	var params = new Object();
+	params.city=city;
+	sendData("http://wthrcdn.etouch.cn/WeatherApi", params, function(data){
+		var str=XML2String(data);
+		 //创建文档对象  
+		var parser=new DOMParser();  
+		var xmlDoc=parser.parseFromString(str,"text/xml");  
+		//城市
+		var city = xmlDoc.getElementsByTagName('city');  
+		$("#city").html(city[0].textContent)
+		    
+		var fengli = xmlDoc.getElementsByTagName('fengli');
+		var shidu = xmlDoc.getElementsByTagName('shidu');  
+		$("#fengli").html("风力"+fengli[1].textContent+"  湿度"+shidu[0].textContent);
+		  		
+		//高温
+		var high = xmlDoc.getElementsByTagName('high');  
+		
+		//低温
+		var low = xmlDoc.getElementsByTagName('low');  
+		
+		//天气
+		var type = xmlDoc.getElementsByTagName('type');  
+		$("#tianqi").html(type[0].textContent)
+		
+		if(type[0].textContent.indexOf("多云") != -1){
+			$("#tubiao").attr("src","img/weather/duoyun.png");
+		}else if(type[0].textContent.indexOf("小雨") != -1){
+			$("#tubiao").attr("src","img/weather/xiaoyu.png");
+		}else if(type[0].textContent.indexOf("晴") != -1){
+			$("#tubiao").attr("src","img/weather/qing.png");
+		}else if(type[0].textContent.indexOf("阴") != -1){
+			$("#tubiao").attr("src","img/weather/yin.png");
+		}else if(type[0].textContent.indexOf("雷阵雨") != -1){
+			$("#tubiao").attr("src","img/weather/leizhenyu.png");
+		}else if(type[0].textContent.indexOf("雨") != -1){
+			$("#tubiao").attr("src","img/weather/yu.png");
+		}else if(type[0].textContent.indexOf("雪") != -1){
+			$("#tubiao").attr("src","img/weather/xue.png");
+		}else{
+			$("#tubiao").attr("src","img/weather/tq.png");
+		}
+		
+		
+		var wendu=low[0].textContent.substr(2,4)+"~"+high[0].textContent.substr(2,4);
+		$("#wendu").html(wendu)
+		
+		//温度
+		var wendu = xmlDoc.getElementsByTagName('wendu');  
+		    
+		var zhishus = xmlDoc.getElementsByTagName('zhishu');  
+		//紫外线强度
+		$("#ziwaixian").html(zhishus[6].getElementsByTagName('detail')[0].textContent)
+		
+		//运动指数
+		$("#yundong").html(zhishus[8].getElementsByTagName('detail')[0].textContent)
+		//晨练指数
+		$("#chenlian").html(zhishus[0].getElementsByTagName('detail')[0].textContent)
+		//穿衣指数
+		$("#chuanyi").html(zhishus[2].getElementsByTagName('detail')[0].textContent)
+		//旅游指数
+		$("#lvyou").html(zhishus[1].getElementsByTagName('detail')[0].textContent)
+		//洗车指数
+	  	$("#xiche").html(zhishus[7].getElementsByTagName('detail')[0].textContent)
+	});
+})	
+
+function XML2String(xmlObject) {
+	// for IE
+	if (window.ActiveXObject) {       
+	    return xmlObject.xml;
+	}
+	// for other browsers
+	else {        
+	    return (new XMLSerializer()).serializeToString(xmlObject);
+	}
+}
+</script>
+<SCRIPT language=javascript type=text/javascript>
+	<!--
+		document.oncontextmenu = new Function('event.returnValue=false;');
+		document.onselectstart = new Function('event.returnValue=false;');
+	-->
+</SCRIPT>
